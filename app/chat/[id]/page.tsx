@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, X, Upload, Shield } from "lucide-react"
+import { Send, X, Upload, Shield, File } from "lucide-react"
 import ChatMessage from "@/components/ChatMessage"
 import { motion, AnimatePresence } from "framer-motion"
+import { uploadFileToS3 } from "@/utils/s3Operations"
 import type React from "react"
 
 export default function ChatRoom() {
@@ -14,6 +15,8 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState([])
   const [inputMessage, setInputMessage] = useState("")
   const [username, setUsername] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     setUsername(Math.random().toString(36).substring(7))
@@ -27,9 +30,41 @@ export default function ChatRoom() {
         text: inputMessage,
         sender: username,
         timestamp: new Date(),
+        type: "text",
       }
       setMessages([...messages, newMessage])
       setInputMessage("")
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setIsUploading(true)
+      try {
+        console.log("Starting file upload for:", file.name)
+        const fileName = `${Date.now()}-${file.name}`
+        const fileUrl = await uploadFileToS3(file, fileName)
+        console.log("File uploaded successfully:", fileUrl)
+
+        const newMessage = {
+          id: Date.now(),
+          text: `File: ${file.name}`,
+          sender: username,
+          timestamp: new Date(),
+          type: "file",
+          fileUrl: fileUrl,
+        }
+        setMessages([...messages, newMessage])
+      } catch (error) {
+        console.error("Detailed error in handleFileUpload:", error)
+        console.error("Error name:", error.name)
+        console.error("Error message:", error.message)
+        console.error("Error stack:", error.stack)
+        alert(`Failed to upload file: ${error.message || "Unknown error"}. Please check the console for more details.`)
+      } finally {
+        setIsUploading(false)
+      }
     }
   }
 
@@ -96,9 +131,25 @@ export default function ChatRoom() {
             <Send className="mr-2" />
             Send
           </Button>
-          <Button type="button" variant="secondary" className="bg-gray-700 hover:bg-gray-600">
-            <Upload className="mr-2" />
-            Upload
+          <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+          <Button
+            type="button"
+            variant="secondary"
+            className="bg-gray-700 hover:bg-gray-600"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <>
+                <File className="animate-spin mr-2" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2" />
+                Upload
+              </>
+            )}
           </Button>
         </form>
       </motion.footer>

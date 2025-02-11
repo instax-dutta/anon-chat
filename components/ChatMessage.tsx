@@ -1,5 +1,6 @@
 import { format } from "date-fns"
 import { motion } from "framer-motion"
+import { File } from "lucide-react"
 
 interface ChatMessageProps {
   message: {
@@ -7,6 +8,8 @@ interface ChatMessageProps {
     text: string
     sender: string
     timestamp: Date
+    type: "text" | "file"
+    fileUrl?: string
   }
   currentUser: string
 }
@@ -28,7 +31,19 @@ export default function ChatMessage({ message, currentUser }: ChatMessageProps) 
         }`}
       >
         <p className="text-sm font-semibold mb-1">{isCurrentUser ? "You" : message.sender}</p>
-        <p className="break-words">{message.text}</p>
+        {message.type === "file" ? (
+          <a
+            href={message.fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-blue-400 hover:text-blue-300"
+          >
+            <File className="mr-2" />
+            {message.text.replace("File: ", "")}
+          </a>
+        ) : (
+          <p className="break-words">{message.text}</p>
+        )}
         <p className="text-xs text-gray-400 mt-1">{format(message.timestamp, "HH:mm")}</p>
       </motion.div>
     </motion.div>
