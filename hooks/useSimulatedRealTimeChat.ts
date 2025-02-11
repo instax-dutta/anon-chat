@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 interface ChatMessage {
   id: number
@@ -13,32 +13,29 @@ interface ChatMessage {
 export function useSimulatedRealTimeChat(roomId: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
 
-  useEffect(() => {
-    // Load initial messages from localStorage
+  const loadMessages = useCallback(() => {
     const storedMessages = localStorage.getItem(`chat_${roomId}`)
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages))
     }
+  }, [roomId])
 
-    // Set up interval to check for new messages
-    const interval = setInterval(() => {
-      const currentStoredMessages = localStorage.getItem(`chat_${roomId}`)
-      if (currentStoredMessages) {
-        const parsedMessages = JSON.parse(currentStoredMessages)
-        if (JSON.stringify(parsedMessages) !== JSON.stringify(messages)) {
-          setMessages(parsedMessages)
-        }
-      }
-    }, 1000) // Check every second
-
+  useEffect(() => {
+    loadMessages()
+    const interval = setInterval(loadMessages, 1000)
     return () => clearInterval(interval)
-  }, [roomId, messages])
+  }, [loadMessages])
 
-  const sendMessage = (newMessage: ChatMessage) => {
-    const updatedMessages = [...messages, newMessage]
-    setMessages(updatedMessages)
-    localStorage.setItem(`chat_${roomId}`, JSON.stringify(updatedMessages))
-  }
+  const sendMessage = useCallback(
+    (newMessage: ChatMessage) => {
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages, newMessage]
+        localStorage.setItem(`chat_${roomId}`, JSON.stringify(updatedMessages))
+        return updatedMessages
+      })
+    },
+    [roomId],
+  )
 
   return { messages, sendMessage }
 }

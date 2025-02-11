@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, X, Upload, Shield, File } from "lucide-react"
+import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings } from "lucide-react"
 import ChatMessage from "@/components/ChatMessage"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSimulatedRealTimeChat } from "@/hooks/useSimulatedRealTimeChat"
+import { useScreenshotDetection } from "@/hooks/useScreenshotDetection"
 import type React from "react"
 
 export default function ChatRoom() {
@@ -15,12 +16,36 @@ export default function ChatRoom() {
   const [inputMessage, setInputMessage] = useState("")
   const [username, setUsername] = useState("")
   const [isUploading, setIsUploading] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const { messages, sendMessage } = useSimulatedRealTimeChat(id)
+  const isScreenshotTaken = useScreenshotDetection()
 
   useEffect(() => {
     setUsername(Math.random().toString(36).substring(7))
+
+    // Disable right-click
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault()
+    }
+    document.addEventListener("contextmenu", handleContextMenu)
+
+    // Disable text selection
+    document.body.style.userSelect = "none"
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu)
+      document.body.style.userSelect = ""
+    }
   }, [])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(scrollToBottom, [])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +59,13 @@ export default function ChatRoom() {
       }
       sendMessage(newMessage)
       setInputMessage("")
+      setIsTyping(false)
     }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputMessage(e.target.value)
+    setIsTyping(e.target.value.length > 0)
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,24 +98,40 @@ export default function ChatRoom() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen relative bg-gray-900"
     >
-      <header className="glassmorphism p-4 flex justify-between items-center">
-        <motion.h1
-          initial={{ x: -20 }}
-          animate={{ x: 0 }}
-          className="text-xl font-bold text-purple-300 flex items-center"
-        >
+      {isScreenshotTaken && (
+        <div className="absolute top-0 left-0 right-0 bg-red-600 text-white p-2 text-center z-50">
+          <AlertTriangle className="inline-block mr-2" />
+          Screenshot detected! This action has been logged.
+        </div>
+      )}
+      <div className="absolute inset-0 pointer-events-none select-none opacity-10 flex items-center justify-center text-4xl font-bold text-gray-500 rotate-45">
+        AnonChat Confidential
+      </div>
+      <header className="bg-gray-800 p-4 flex justify-between items-center relative z-10">
+        <motion.div initial={{ x: -20 }} animate={{ x: 0 }} className="flex items-center">
           <Shield className="mr-2 text-yellow-400" />
-          AnonChat: Room {id}
-        </motion.h1>
-        <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
-          End Chat
-          <X className="ml-2" />
-        </Button>
+          <h1 className="text-xl font-bold text-purple-300">AnonChat: Room {id}</h1>
+        </motion.div>
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+            <Users className="mr-2" />
+            Participants
+          </Button>
+          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+            <Settings className="mr-2" />
+            Settings
+          </Button>
+          <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
+            End Chat
+            <X className="ml-2" />
+          </Button>
+        </div>
       </header>
       <motion.div
-        className="flex-grow overflow-auto p-4 space-y-4"
+        ref={chatContainerRef}
+        className="flex-grow overflow-auto p-4 space-y-4 relative z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
@@ -102,15 +149,17 @@ export default function ChatRoom() {
             </motion.div>
           ))}
         </AnimatePresence>
+        <div ref={messagesEndRef} />
       </motion.div>
-      <motion.footer className="glassmorphism p-4" initial={{ y: 20 }} animate={{ y: 0 }}>
+      <motion.footer className="bg-gray-800 p-4 relative z-10" initial={{ y: 20 }} animate={{ y: 0 }}>
+        {isTyping && <div className="text-sm text-gray-400 mb-2">Someone is typing...</div>}
         <form onSubmit={handleSendMessage} className="flex space-x-2">
           <Input
             type="text"
             placeholder="Type your message..."
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            className="flex-grow bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500"
+            onChange={handleInputChange}
+            className="flex-grow bg-gray-700 text-white border-gray-600 focus:border-purple-500 focus:ring-purple-500"
           />
           <Button
             type="submit"
