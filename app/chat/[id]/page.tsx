@@ -7,22 +7,22 @@ import { Input } from "@/components/ui/input"
 import { Send, X, Upload, Shield, File } from "lucide-react"
 import ChatMessage from "@/components/ChatMessage"
 import { motion, AnimatePresence } from "framer-motion"
-import { uploadFileToS3 } from "@/utils/s3Operations"
+import { useSimulatedRealTimeChat } from "@/hooks/useSimulatedRealTimeChat"
 import type React from "react"
 
 export default function ChatRoom() {
-  const { id } = useParams()
-  const [messages, setMessages] = useState([])
+  const { id } = useParams() as { id: string }
   const [inputMessage, setInputMessage] = useState("")
   const [username, setUsername] = useState("")
   const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { messages, sendMessage } = useSimulatedRealTimeChat(id)
 
   useEffect(() => {
     setUsername(Math.random().toString(36).substring(7))
   }, [])
 
-  const sendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputMessage.trim()) {
       const newMessage = {
@@ -30,41 +30,29 @@ export default function ChatRoom() {
         text: inputMessage,
         sender: username,
         timestamp: new Date(),
-        type: "text",
+        type: "text" as const,
       }
-      setMessages([...messages, newMessage])
+      sendMessage(newMessage)
       setInputMessage("")
     }
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setIsUploading(true)
-      try {
-        console.log("Starting file upload for:", file.name)
-        const fileName = `${Date.now()}-${file.name}`
-        const fileUrl = await uploadFileToS3(file, fileName)
-        console.log("File uploaded successfully:", fileUrl)
-
+      // Simulate file upload
+      setTimeout(() => {
         const newMessage = {
           id: Date.now(),
-          text: `File: ${file.name}`,
+          text: `File: ${file.name} (Upload simulated)`,
           sender: username,
           timestamp: new Date(),
-          type: "file",
-          fileUrl: fileUrl,
+          type: "file" as const,
         }
-        setMessages([...messages, newMessage])
-      } catch (error) {
-        console.error("Detailed error in handleFileUpload:", error)
-        console.error("Error name:", error.name)
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
-        alert(`Failed to upload file: ${error.message || "Unknown error"}. Please check the console for more details.`)
-      } finally {
+        sendMessage(newMessage)
         setIsUploading(false)
-      }
+      }, 1500)
     }
   }
 
@@ -116,7 +104,7 @@ export default function ChatRoom() {
         </AnimatePresence>
       </motion.div>
       <motion.footer className="glassmorphism p-4" initial={{ y: 20 }} animate={{ y: 0 }}>
-        <form onSubmit={sendMessage} className="flex space-x-2">
+        <form onSubmit={handleSendMessage} className="flex space-x-2">
           <Input
             type="text"
             placeholder="Type your message..."

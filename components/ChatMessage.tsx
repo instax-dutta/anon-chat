@@ -9,7 +9,6 @@ interface ChatMessageProps {
     sender: string
     timestamp: Date
     type: "text" | "file"
-    fileUrl?: string
   }
   currentUser: string
 }
@@ -32,19 +31,14 @@ export default function ChatMessage({ message, currentUser }: ChatMessageProps) 
       >
         <p className="text-sm font-semibold mb-1">{isCurrentUser ? "You" : message.sender}</p>
         {message.type === "file" ? (
-          <a
-            href={message.fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-blue-400 hover:text-blue-300"
-          >
+          <div className="flex items-center">
             <File className="mr-2" />
-            {message.text.replace("File: ", "")}
-          </a>
+            <span>{message.text}</span>
+          </div>
         ) : (
           <p className="break-words">{message.text}</p>
         )}
-        <p className="text-xs text-gray-400 mt-1">{format(message.timestamp, "HH:mm")}</p>
+        <p className="text-xs text-gray-400 mt-1">{format(new Date(message.timestamp), "HH:mm")}</p>
       </motion.div>
     </motion.div>
   )
