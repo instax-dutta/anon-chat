@@ -69,11 +69,7 @@ export default function ChatMessage({ message, currentUser }: ChatMessageProps) 
         </div>
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`rounded-lg p-3 ${
-            isCurrentUser
-              ? "bg-gradient-to-r from-purple-600 to-purple-700"
-              : "bg-gradient-to-r from-gray-700 to-gray-800"
-          }`}
+          className={`rounded-lg p-3 backdrop-blur-sm ${isCurrentUser ? "bg-purple-600/70" : "bg-gray-800/70"}`}
         >
           {message.type === "file" ? (
             <div className="flex items-center">

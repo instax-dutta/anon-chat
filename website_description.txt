@@ -1,0 +1,40 @@
+# AnonChat: Secure and Anonymous Conversations
+
+AnonChat is a web application that provides a platform for secure and anonymous conversations. It allows users to create chat rooms and share them with others, enabling them to chat without revealing their identity.
+
+## Key Features:
+
+- **Anonymous Chatting:** Users can chat freely without revealing their identity. No personal information is required or stored.
+- **End-to-end Encryption:** The application uses state-of-the-art encryption to ensure the privacy and security of conversations.
+- **Self-Destructing Chats:** Messages vanish when the chat ends, ensuring that no data is stored permanently.
+- **No Logs Policy:** The application does not store any user conversations or data.
+- **Screenshot Detection:** The application detects when a screenshot is taken and logs the action.
+
+## How It Works:
+
+1.  **Create a Chat Room:** Users can create a new chat room by clicking the "Start Anonymous Chat" button on the homepage. This generates a unique, random chat ID.
+2.  **Share the Link:** The user can then share the generated link with others to invite them to the chat room.
+3.  **Secure and Anonymous Chat:** Once in the chat room, users can send text messages and upload files. All messages are encrypted and sent anonymously.
+4.  **End Chat:** Users can end the chat at any time. When the chat ends, all messages are deleted and no data is stored.
+
+## Technologies Used:
+
+- Next.js
+- React
+- Tailwind CSS
+- Framer Motion
+- Lucide React
+- Rust 
+- WebAssembly
+- onion-rs (Rust library for end-to-end encryption)
+
+## File Structure:
+
+- `app/page.tsx`: Implements the homepage of the website.
+- `app/create-chat/page.tsx`: Implements the create chat page, which allows users to create a new chat room.
+- `app/chat/[id]/page.tsx`: Implements the chat room functionality.
+- `components/ChatMessage.tsx`: Implements the chat message component.
+- `components/Footer.tsx`: Implements the footer component.
+- `components/Header.tsx`: Implements the header component.
+- `hooks/useSimulatedRealTimeChat.ts`: Implements the simulated real-time chat functionality.
+- `hooks/useScreenshotDetection.ts`: Implements the screenshot detection functionality.

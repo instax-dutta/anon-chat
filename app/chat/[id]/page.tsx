@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings } from "lucide-react"
+import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings, Loader2 } from "lucide-react"
 import ChatMessage from "@/components/ChatMessage"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSimulatedRealTimeChat } from "@/hooks/useSimulatedRealTimeChat"
@@ -20,11 +20,12 @@ export default function ChatRoom() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { messages, sendMessage } = useSimulatedRealTimeChat(id)
+  const { messages, sendMessage, isLoading } = useSimulatedRealTimeChat(id)
   const isScreenshotTaken = useScreenshotDetection()
 
   useEffect(() => {
-    setUsername(Math.random().toString(36).substring(7))
+    const randomUsername = Math.random().toString(36).substring(7)
+    setUsername(randomUsername)
 
     // Disable right-click
     const handleContextMenu = (e: MouseEvent) => {
@@ -41,11 +42,11 @@ export default function ChatRoom() {
     }
   }, [])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(scrollToBottom, [])
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [messagesEndRef]) // Removed 'messages' from dependencies
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,7 +73,6 @@ export default function ChatRoom() {
     const file = e.target.files?.[0]
     if (file) {
       setIsUploading(true)
-      // Simulate file upload
       setTimeout(() => {
         const newMessage = {
           id: Date.now(),
@@ -94,22 +94,15 @@ export default function ChatRoom() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col h-screen relative bg-gray-900"
-    >
+    <div className="h-screen flex flex-col bg-[#0a0a0f]">
       {isScreenshotTaken && (
         <div className="absolute top-0 left-0 right-0 bg-red-600 text-white p-2 text-center z-50">
           <AlertTriangle className="inline-block mr-2" />
           Screenshot detected! This action has been logged.
         </div>
       )}
-      <div className="absolute inset-0 pointer-events-none select-none opacity-10 flex items-center justify-center text-4xl font-bold text-gray-500 rotate-45">
-        AnonChat Confidential
-      </div>
-      <header className="bg-gray-800 p-4 flex justify-between items-center relative z-10">
+
+      <header className="bg-gray-800 p-4 flex justify-between items-center">
         <motion.div initial={{ x: -20 }} animate={{ x: 0 }} className="flex items-center">
           <Shield className="mr-2 text-yellow-400" />
           <h1 className="text-xl font-bold text-purple-300">AnonChat: Room {id}</h1>
@@ -129,29 +122,37 @@ export default function ChatRoom() {
           </Button>
         </div>
       </header>
-      <motion.div
-        ref={chatContainerRef}
-        className="flex-grow overflow-auto p-4 space-y-4 relative z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <AnimatePresence>
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ChatMessage message={message} currentUser={username} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+
+      <main ref={chatContainerRef} className="flex-1 overflow-auto p-4 bg-gray-900">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <Shield className="w-12 h-12 mb-4 text-yellow-400" />
+            <p className="text-lg font-medium">No messages yet</p>
+            <p className="text-sm">Start the conversation!</p>
+          </div>
+        ) : (
+          <AnimatePresence>
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChatMessage message={message} currentUser={username} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
         <div ref={messagesEndRef} />
-      </motion.div>
-      <motion.footer className="bg-gray-800 p-4 relative z-10" initial={{ y: 20 }} animate={{ y: 0 }}>
+      </main>
+
+      <footer className="bg-gray-800 p-4">
         {isTyping && <div className="text-sm text-gray-400 mb-2">Someone is typing...</div>}
         <form onSubmit={handleSendMessage} className="flex space-x-2">
           <Input
@@ -189,8 +190,8 @@ export default function ChatRoom() {
             )}
           </Button>
         </form>
-      </motion.footer>
-    </motion.div>
+      </footer>
+    </div>
   )
 }
 
