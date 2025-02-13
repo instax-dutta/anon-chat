@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings, Loader2 } from "lucide-react"
-import ChatMessage from "@/components/ChatMessage"
-import { motion, AnimatePresence } from "framer-motion"
-import { useSimulatedRealTimeChat } from "@/hooks/useSimulatedRealTimeChat"
+import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings } from "lucide-react"
+import { motion } from "framer-motion"
+// import { useSimulatedRealTimeChat } from "@/hooks/useSimulatedRealTimeChat"
 import { useScreenshotDetection } from "@/hooks/useScreenshotDetection"
 import type React from "react"
 
@@ -20,7 +19,7 @@ export default function ChatRoom() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { messages, sendMessage, isLoading } = useSimulatedRealTimeChat(id)
+  // const { messages, sendMessage, isLoading } = useSimulatedRealTimeChat(id)
   const isScreenshotTaken = useScreenshotDetection()
 
   useEffect(() => {
@@ -51,16 +50,10 @@ export default function ChatRoom() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (inputMessage.trim()) {
-      const newMessage = {
-        id: Date.now(),
-        text: inputMessage,
-        sender: username,
-        timestamp: new Date(),
-        type: "text" as const,
-      }
-      sendMessage(newMessage)
+      // For now, just clear the input
       setInputMessage("")
       setIsTyping(false)
+      // We'll add actual sending logic later when we connect to the backend
     }
   }
 
@@ -81,7 +74,7 @@ export default function ChatRoom() {
           timestamp: new Date(),
           type: "file" as const,
         }
-        sendMessage(newMessage)
+        // sendMessage(newMessage)
         setIsUploading(false)
       }, 1500)
     }
@@ -124,32 +117,11 @@ export default function ChatRoom() {
       </header>
 
       <main ref={chatContainerRef} className="flex-1 overflow-auto p-4 bg-gray-900">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <Shield className="w-12 h-12 mb-4 text-yellow-400" />
-            <p className="text-lg font-medium">No messages yet</p>
-            <p className="text-sm">Start the conversation!</p>
-          </div>
-        ) : (
-          <AnimatePresence>
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ChatMessage message={message} currentUser={username} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-        <div ref={messagesEndRef} />
+        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+          <Shield className="w-12 h-12 mb-4 text-yellow-400" />
+          <p className="text-lg font-medium">Chat functionality coming soon</p>
+          <p className="text-sm">We're working on connecting to the backend</p>
+        </div>
       </main>
 
       <footer className="bg-gray-800 p-4">
