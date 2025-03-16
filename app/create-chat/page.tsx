@@ -3,18 +3,28 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ArrowRight, Lock, Loader2 } from "lucide-react"
+import { ArrowRight, Lock, Loader2, Users } from "lucide-react"
 import ShareableLink from "@/components/ShareableLink"
 import { motion } from "framer-motion"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 interface ChatResponse {
   chat_id: string
   onion_address: string
   web_address: string
+  max_participants: number
 }
 
 export default function CreateChatPage() {
   const [chatTitle, setChatTitle] = useState("")
+  const [maxParticipants, setMaxParticipants] = useState<string>("2")
   const [chatData, setChatData] = useState<ChatResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,11 +48,15 @@ export default function CreateChatPage() {
         },
         body: JSON.stringify({
           title: chatTitle.trim() || undefined,
+          max_participants: parseInt(maxParticipants),
         }),
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to create chat: ${response.statusText}`)
+        const errorData = await response.json().catch(() => null)
+        throw new Error(
+          errorData?.error || `Failed to create chat: ${response.statusText}`
+        )
       }
 
       const data = await response.json()
@@ -67,6 +81,7 @@ export default function CreateChatPage() {
         <ShareableLink
           chatId={chatData.chat_id}
           onionAddress={chatData.onion_address}
+          maxParticipants={chatData.max_participants}
         />
         <Button
           asChild
@@ -96,14 +111,50 @@ export default function CreateChatPage() {
       )}
       <form onSubmit={handleSubmit} className="w-full max-w-md">
         <div className="glassmorphism p-6 mb-6">
-          <Input
-            type="text"
-            placeholder="Enter chat title (optional)"
-            value={chatTitle}
-            onChange={(e) => setChatTitle(e.target.value)}
-            className="mb-4 bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500"
-            disabled={isLoading}
-          />
+          <div className="mb-4">
+            <Label htmlFor="chat-title" className="text-gray-300 mb-2 block">
+              Chat Title (optional)
+            </Label>
+            <Input
+              id="chat-title"
+              type="text"
+              placeholder="Enter a title for your chat"
+              value={chatTitle}
+              onChange={(e) => setChatTitle(e.target.value)}
+              className="bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="mb-6">
+            <Label htmlFor="max-participants" className="text-gray-300 mb-2 block">
+              Maximum Participants
+            </Label>
+            <div className="flex items-center">
+              <Users className="mr-2 text-purple-400" />
+              <Select
+                value={maxParticipants}
+                onValueChange={setMaxParticipants}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500">
+                  <SelectValue placeholder="Select maximum participants" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 text-white border-gray-700">
+                  <SelectItem value="2">2 people (private chat)</SelectItem>
+                  <SelectItem value="5">5 people (small group)</SelectItem>
+                  <SelectItem value="10">10 people (medium group)</SelectItem>
+                  <SelectItem value="25">25 people (large group)</SelectItem>
+                  <SelectItem value="50">50 people (very large group)</SelectItem>
+                  <SelectItem value="100">100 people (maximum)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              By default, chats are limited to 2 participants for maximum privacy.
+            </p>
+          </div>
+
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 button-glow"

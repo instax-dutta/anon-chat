@@ -25,8 +25,15 @@ interface FileInfo {
   content: string
 }
 
+interface Participant {
+  id: string
+  username: string
+}
+
 export function useWebSocket(chatId: string, username: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [maxParticipants, setMaxParticipants] = useState<number>(2)
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -62,8 +69,47 @@ export function useWebSocket(chatId: string, username: string) {
 
       socket.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data) as ChatMessage
-          setMessages((prevMessages) => [...prevMessages, message])
+          const data = JSON.parse(event.data)
+
+          // Handle different types of messages
+          if (data.type === "chat_info") {
+            // Chat room information
+            setMaxParticipants(data.max_participants || 2)
+            setParticipants(data.participants || [])
+          } else if (data.type === "participant_joined") {
+            // New participant joined
+            setParticipants(prev => [...prev, {
+              id: data.participant_id,
+              username: data.participant_name
+            }])
+          } else if (data.type === "participant_left") {
+            // Participant left
+            setParticipants(prev =>
+              prev.filter(p => p.id !== data.participant_id)
+            )
+          } else {
+            // Regular chat message
+            const message = data as ChatMessage
+            setMessages((prevMessages) => [...prevMessages, message])
+
+            // If it's a join/leave message, update participants list
+            if (message.message_type === "Join") {
+              const newParticipant = {
+                id: message.sender_id,
+                username: message.sender_name
+              }
+              setParticipants(prev => {
+                if (!prev.some(p => p.id === newParticipant.id)) {
+                  return [...prev, newParticipant]
+                }
+                return prev
+              })
+            } else if (message.message_type === "Leave") {
+              setParticipants(prev =>
+                prev.filter(p => p.id !== message.sender_id)
+              )
+            }
+          }
         } catch (err) {
           console.error("Error parsing message:", err)
         }
@@ -180,5 +226,7 @@ export function useWebSocket(chatId: string, username: string) {
     isConnected,
     isLoading,
     error,
+    participants,
+    maxParticipants,
   }
 }

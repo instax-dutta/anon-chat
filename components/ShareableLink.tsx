@@ -1,16 +1,18 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Copy, Check, Shield } from "lucide-react"
+import { Copy, Check, Shield, Users } from "lucide-react"
 import { motion } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 
 interface ShareableLinkProps {
   chatId: string
   onionAddress?: string
+  maxParticipants?: number
 }
 
-export default function ShareableLink({ chatId, onionAddress }: ShareableLinkProps) {
+export default function ShareableLink({ chatId, onionAddress, maxParticipants }: ShareableLinkProps) {
   const [copiedWeb, setCopiedWeb] = useState(false)
   const [copiedOnion, setCopiedOnion] = useState(false)
   const webLink = `${window.location.origin}/chat/${chatId}`
@@ -36,7 +38,15 @@ export default function ShareableLink({ chatId, onionAddress }: ShareableLinkPro
       transition={{ duration: 0.5 }}
       className="glassmorphism p-6 w-full max-w-md"
     >
-      <h2 className="text-xl font-semibold mb-4 text-purple-300">Share this link to start chatting</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-purple-300">Share this link to start chatting</h2>
+        {maxParticipants && (
+          <Badge variant="outline" className="bg-gray-800 text-yellow-400 border-yellow-500/50 flex items-center">
+            <Users className="w-3 h-3 mr-1" />
+            {maxParticipants} {maxParticipants === 1 ? 'person' : 'people'}
+          </Badge>
+        )}
+      </div>
 
       <Tabs defaultValue="web" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -87,7 +97,21 @@ export default function ShareableLink({ chatId, onionAddress }: ShareableLinkPro
         </TabsContent>
       </Tabs>
 
-      <p className="mt-4 text-sm text-gray-400">This link will only work once and expires after 24 hours.</p>
+      <div className="mt-4 text-sm text-gray-400">
+        <p>This link will only work once and expires after 24 hours.</p>
+        {maxParticipants && maxParticipants > 2 && (
+          <p className="mt-2 flex items-center">
+            <Users className="w-4 h-4 mr-1 text-purple-400" />
+            <span>This is a group chat that can accommodate up to {maxParticipants} participants.</span>
+          </p>
+        )}
+        {maxParticipants && maxParticipants === 2 && (
+          <p className="mt-2 flex items-center">
+            <Users className="w-4 h-4 mr-1 text-purple-400" />
+            <span>This is a private one-on-one chat.</span>
+          </p>
+        )}
+      </div>
     </motion.div>
   )
 }
