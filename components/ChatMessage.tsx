@@ -1,149 +1,123 @@
-import { useState } from "react"
-import { format } from "date-fns"
+import React from "react"
 import { motion } from "framer-motion"
-import { File, ExternalLink, ThumbsUp, Heart, Smile, Copy } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Shield, Download, File, User, Info } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 
 interface ChatMessageProps {
   message: {
-    id: number
-    text: string
-    sender: string
-    timestamp: Date
-    type: "text" | "file"
+    id: string
+    chat_id: string
+    sender_id: string
+    sender_name: string
+    content: string
+    message_type: "Text" | "File" | "Join" | "Leave" | "System"
+    timestamp: string
+    file_info?: {
+      name: string
+      size: number
+      mime_type: string
+      content: string
+    }
   }
-  currentUser: string
+  isOwnMessage: boolean
 }
 
-export default function ChatMessage({ message, currentUser }: ChatMessageProps) {
-  const [reaction, setReaction] = useState<string | null>(null)
-  const isCurrentUser = message.sender === currentUser
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, isOwnMessage }) => {
+  const timestamp = new Date(message.timestamp)
+  const timeAgo = formatDistanceToNow(timestamp, { addSuffix: true })
 
-  const renderTextWithLinks = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = text.split(urlRegex)
+  const handleDownload = () => {
+    if (!message.file_info) return
 
-    return parts.map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 underline flex items-center"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (!window.confirm("Are you sure you want to open this link? It may contain malicious content.")) {
-                e.preventDefault()
-              }
-            }}
-          >
-            {part}
-            <ExternalLink className="ml-1 w-4 h-4" />
-          </a>
-        )
-      }
-      return part
-    })
+    const link = document.createElement("a")
+    link.href = `data:${message.file_info.mime_type};base64,${message.file_info.content}`
+    link.download = message.file_info.name
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(message.text)
+  // System messages
+  if (message.message_type === "System") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center my-2"
+      >
+        <div className="bg-gray-800/50 text-gray-400 px-4 py-2 rounded-full text-sm flex items-center">
+          <Info className="w-4 h-4 mr-2" />
+          {message.content}
+        </div>
+      </motion.div>
+    )
   }
 
+  // Join/Leave messages
+  if (message.message_type === "Join" || message.message_type === "Leave") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center my-2"
+      >
+        <div className="bg-gray-800/50 text-gray-400 px-4 py-2 rounded-full text-sm flex items-center">
+          <User className="w-4 h-4 mr-2" />
+          {message.content}
+        </div>
+      </motion.div>
+    )
+  }
+
+  // Regular messages
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-4`}
+      className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
     >
-      <div className={`max-w-xs md:max-w-md ${isCurrentUser ? "order-2" : ""}`}>
-        <div className="flex items-center mb-1">
-          <span className={`text-sm font-semibold ${isCurrentUser ? "text-purple-300" : "text-yellow-300"}`}>
-            {isCurrentUser ? "You" : message.sender}
-          </span>
-          <span className="text-xs text-gray-400 ml-2">{format(new Date(message.timestamp), "HH:mm")}</span>
-        </div>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className={`rounded-lg p-3 backdrop-blur-sm ${isCurrentUser ? "bg-purple-600/70" : "bg-gray-800/70"}`}
-        >
-          {message.type === "file" ? (
-            <div className="flex items-center">
-              <File className="mr-2" />
-              <span>{message.text}</span>
+      <div
+        className={`max-w-[80%] ${
+          isOwnMessage
+            ? "bg-purple-600/30 border-purple-600/50"
+            : "bg-gray-800/50 border-gray-700/50"
+        } border rounded-lg p-3`}
+      >
+        {!isOwnMessage && (
+          <div className="flex items-center mb-1">
+            <Shield className="w-4 h-4 text-yellow-400 mr-1" />
+            <span className="text-sm font-medium text-yellow-400">{message.sender_name}</span>
+          </div>
+        )}
+
+        {message.message_type === "File" && message.file_info ? (
+          <div className="mb-2">
+            <div className="flex items-center bg-gray-900/50 p-2 rounded-md">
+              <File className="text-purple-400 mr-2" />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-white truncate">{message.file_info.name}</div>
+                <div className="text-xs text-gray-400">
+                  {(message.file_info.size / 1024).toFixed(1)} KB
+                </div>
+              </div>
+              <button
+                onClick={handleDownload}
+                className="ml-2 p-1 bg-gray-700 hover:bg-gray-600 rounded-full"
+                title="Download file"
+              >
+                <Download className="w-4 h-4 text-purple-300" />
+              </button>
             </div>
-          ) : (
-            <p className="break-words">{renderTextWithLinks(message.text)}</p>
-          )}
-        </motion.div>
-        <div className="flex items-center mt-1 space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-gray-300"
-                  onClick={() => setReaction(reaction === "like" ? null : "like")}
-                >
-                  <ThumbsUp className={`w-4 h-4 ${reaction === "like" ? "text-blue-400" : ""}`} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Like</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-gray-300"
-                  onClick={() => setReaction(reaction === "love" ? null : "love")}
-                >
-                  <Heart className={`w-4 h-4 ${reaction === "love" ? "text-red-400" : ""}`} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Love</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-gray-300"
-                  onClick={() => setReaction(reaction === "smile" ? null : "smile")}
-                >
-                  <Smile className={`w-4 h-4 ${reaction === "smile" ? "text-yellow-400" : ""}`} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Smile</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-gray-300"
-                  onClick={copyToClipboard}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          </div>
+        ) : null}
+
+        <p className="text-white break-words">{message.content}</p>
+        <div className="text-right mt-1">
+          <span className="text-xs text-gray-400">{timeAgo}</span>
         </div>
       </div>
     </motion.div>
   )
 }
 
+export default ChatMessage
