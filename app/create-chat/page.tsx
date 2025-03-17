@@ -35,11 +35,8 @@ export default function CreateChatPage() {
     setError(null)
 
     try {
-      // Get the API URL based on the environment
-      const isProduction = process.env.NODE_ENV === "production"
-      const apiUrl = isProduction
-        ? `${window.location.origin}/api/chat`
-        : "http://localhost:3000/api/chat"
+      // Hardcoded API URL
+      const apiUrl = "https://api.anonchat.space/api/chat";
 
       const response = await fetch(apiUrl, {
         method: "POST",

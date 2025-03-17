@@ -39,12 +39,10 @@ export function useWebSocket(chatId: string, username: string) {
   const [error, setError] = useState<string | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
 
-  // Get the WebSocket URL based on the environment
+  // Get the WebSocket URL with hardcoded domain
   const getWebSocketUrl = useCallback(() => {
-    const isProduction = process.env.NODE_ENV === "production"
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-    const host = isProduction ? window.location.host : "localhost:3000"
-    return `${protocol}//${host}/api/ws/${chatId}`
+    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//api.anonchat.space/api/ws/${chatId}`;
   }, [chatId])
 
   // Connect to the WebSocket

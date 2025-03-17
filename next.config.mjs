@@ -15,6 +15,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: ['api.anonchat.space'],
   },
   experimental: {
     webpackBuildWorker: true,
