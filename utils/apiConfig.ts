@@ -1,19 +1,41 @@
 "use client"
 
-// API configuration with hardcoded API URL
+// Determine the API base URL based on the environment
+const getBaseUrl = () => {
+  // For development environment, use the environment variable or fallback to localhost
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  }
+  
+  // For production with Tor, use the onion address
+  // This will be used when accessing through Tor Browser
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.onion')) {
+    return `http://${window.location.hostname}/api`;
+  }
+  
+  // For regular web access in production
+  return process.env.NEXT_PUBLIC_PRODUCTION_API_URL || 'https://api.anonchat.space/api';
+};
+
+// API configuration with dynamic URL determination
 const API_CONFIG = {
-  // Updated base URL for the Tor hidden service API
-  baseUrl: "http://thmvke5ga7fpm5m23w7hz72fjvnhd3zpeepzk4z7pd7pamjqjml3sead.onion/api",
+  // Get the base URL for API requests
+  get baseUrl() {
+    return getBaseUrl();
+  },
 
   // Get the full API URL for a specific endpoint
   getApiUrl: (endpoint: string) => {
-    return `http://thmvke5ga7fpm5m23w7hz72fjvnhd3zpeepzk4z7pd7pamjqjml3sead.onion/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const base = getBaseUrl();
+    return `${base}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   },
 
   // Get the WebSocket URL for a specific chat ID
   getWebSocketUrl: (chatId: string) => {
-    // Explicitly use ws:// for Tor hidden service
-    return `ws://thmvke5ga7fpm5m23w7hz72fjvnhd3zpeepzk4z7pd7pamjqjml3sead.onion/api/ws/${chatId}`;
+    const base = getBaseUrl();
+    // Replace http:// with ws:// or https:// with wss://
+    const wsBase = base.replace(/^http/, 'ws');
+    return `${wsBase}/ws/${chatId}`;
   }
 };
 
