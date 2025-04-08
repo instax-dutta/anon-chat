@@ -14,6 +14,7 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import API_CONFIG from "@/utils/apiConfig"
 
 interface ChatResponse {
   chat_id: string
@@ -35,8 +36,7 @@ export default function CreateChatPage() {
     setError(null)
 
     try {
-      // Hardcoded API URL
-      const apiUrl = "https://api.anonchat.space/api/chat";
+      const apiUrl = API_CONFIG.getApiUrl("/chats");
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -185,4 +185,3 @@ export default function CreateChatPage() {
     </motion.div>
   )
 }
-
