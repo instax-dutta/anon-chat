@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Copy, Check, Shield, Users } from "lucide-react"
+import { Copy, Check, Shield, Users, Mail, Send, Plus, X } from "lucide-react"
 import { motion } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "@/hooks/use-toast"
 
 interface ShareableLinkProps {
   chatId: string
@@ -15,6 +16,9 @@ interface ShareableLinkProps {
 export default function ShareableLink({ chatId, onionAddress, maxParticipants }: ShareableLinkProps) {
   const [copiedWeb, setCopiedWeb] = useState(false)
   const [copiedOnion, setCopiedOnion] = useState(false)
+  const [emails, setEmails] = useState<string[]>([])
+  const [currentEmail, setCurrentEmail] = useState("")
+  const [isValidEmail, setIsValidEmail] = useState(true)
   const webLink = `${window.location.origin}/chat/${chatId}`
 
   const copyWebLink = () => {
@@ -29,6 +33,77 @@ export default function ShareableLink({ chatId, onionAddress, maxParticipants }:
       setCopiedOnion(true)
       setTimeout(() => setCopiedOnion(false), 2000)
     }
+  }
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(email)
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setCurrentEmail(value)
+    setIsValidEmail(value === "" || validateEmail(value))
+  }
+
+  const addEmail = () => {
+    if (currentEmail && validateEmail(currentEmail) && !emails.includes(currentEmail)) {
+      setEmails([...emails, currentEmail])
+      setCurrentEmail("")
+    } else if (!validateEmail(currentEmail)) {
+      setIsValidEmail(false)
+    } else if (emails.includes(currentEmail)) {
+      toast({
+        title: "Email already added",
+        description: "This email is already in the list",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const removeEmail = (email: string) => {
+    setEmails(emails.filter(e => e !== email))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addEmail()
+    }
+  }
+
+  const sendInvites = () => {
+    if (emails.length === 0) {
+      toast({
+        title: "No emails added",
+        description: "Please add at least one email address",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const subject = "Invitation to AnonChat"
+    const body = `
+Hello,
+
+You've been invited to join a secure, anonymous chat.
+
+Click the link below to join:
+${webLink}
+
+This link will only work once and expires after 24 hours.
+
+Regards,
+AnonChat
+    `.trim()
+
+    const mailtoLink = `mailto:${emails.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(mailtoLink, '_blank')
+
+    toast({
+      title: "Email client opened",
+      description: `Invitation prepared for ${emails.length} recipient${emails.length > 1 ? 's' : ''}`,
+    })
   }
 
   return (
@@ -49,9 +124,10 @@ export default function ShareableLink({ chatId, onionAddress, maxParticipants }:
       </div>
 
       <Tabs defaultValue="web" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
+        <TabsList className="grid w-full grid-cols-3 mb-4">
           <TabsTrigger value="web">Web Link</TabsTrigger>
           <TabsTrigger value="onion">Onion Link (Tor)</TabsTrigger>
+          <TabsTrigger value="email">Email Invite</TabsTrigger>
         </TabsList>
 
         <TabsContent value="web">
@@ -93,6 +169,71 @@ export default function ShareableLink({ chatId, onionAddress, maxParticipants }:
           <div className="mt-2 text-sm text-yellow-400 flex items-center">
             <Shield className="w-4 h-4 mr-1" />
             <span>For maximum privacy, use this link with Tor Browser.</span>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="email">
+          <div className="space-y-4">
+            <div className="flex space-x-2">
+              <Input
+                type="email"
+                value={currentEmail}
+                onChange={handleEmailChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter email address"
+                className={`flex-grow bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500 ${!isValidEmail ? 'border-red-500' : ''}`}
+              />
+              <Button 
+                onClick={addEmail} 
+                variant="secondary" 
+                className="bg-gray-700 hover:bg-gray-600"
+                disabled={!currentEmail || !isValidEmail}
+              >
+                <Plus className="mr-2" />
+                Add
+              </Button>
+            </div>
+            
+            {!isValidEmail && (
+              <p className="text-sm text-red-500">Please enter a valid email address</p>
+            )}
+
+            {emails.length > 0 && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-400 mb-2">Recipients:</p>
+                <div className="flex flex-wrap gap-2">
+                  {emails.map((email, index) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary"
+                      className="bg-gray-700 text-white flex items-center gap-1 py-1 px-2"
+                    >
+                      <Mail className="w-3 h-3" />
+                      <span>{email}</span>
+                      <button 
+                        onClick={() => removeEmail(email)}
+                        className="ml-1 text-gray-400 hover:text-white"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Button 
+              onClick={sendInvites} 
+              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600"
+              disabled={emails.length === 0}
+            >
+              <Send className="mr-2 w-4 h-4" />
+              Send Invites
+            </Button>
+
+            <p className="text-sm text-gray-400">
+              This will open your email client with a pre-populated message containing the invite link.
+            </p>
           </div>
         </TabsContent>
       </Tabs>
