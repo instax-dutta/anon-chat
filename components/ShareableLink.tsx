@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Copy, Check, Shield, Users, Mail, Send, Plus, X } from "lucide-react"
+import { Copy, Check, Users, Mail, Send, Plus, X } from "lucide-react"
 import { motion } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -9,13 +9,12 @@ import { toast } from "@/hooks/use-toast"
 
 interface ShareableLinkProps {
   chatId: string
-  onionAddress?: string
+  onionAddress?: string // Keeping for backward compatibility but not using it
   maxParticipants?: number
 }
 
-export default function ShareableLink({ chatId, onionAddress, maxParticipants }: ShareableLinkProps) {
+export default function ShareableLink({ chatId, maxParticipants }: ShareableLinkProps) {
   const [copiedWeb, setCopiedWeb] = useState(false)
-  const [copiedOnion, setCopiedOnion] = useState(false)
   const [emails, setEmails] = useState<string[]>([])
   const [currentEmail, setCurrentEmail] = useState("")
   const [isValidEmail, setIsValidEmail] = useState(true)
@@ -25,14 +24,6 @@ export default function ShareableLink({ chatId, onionAddress, maxParticipants }:
     navigator.clipboard.writeText(webLink)
     setCopiedWeb(true)
     setTimeout(() => setCopiedWeb(false), 2000)
-  }
-
-  const copyOnionLink = () => {
-    if (onionAddress) {
-      navigator.clipboard.writeText(`http://${onionAddress}/chat/${chatId}`)
-      setCopiedOnion(true)
-      setTimeout(() => setCopiedOnion(false), 2000)
-    }
   }
 
   const validateEmail = (email: string) => {
@@ -124,9 +115,8 @@ AnonChat
       </div>
 
       <Tabs defaultValue="web" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="web">Web Link</TabsTrigger>
-          <TabsTrigger value="onion">Onion Link (Tor)</TabsTrigger>
           <TabsTrigger value="email">Email Invite</TabsTrigger>
         </TabsList>
 
@@ -144,32 +134,8 @@ AnonChat
             </Button>
           </div>
           <p className="mt-2 text-sm text-gray-400">
-            Standard web link for regular browsers.
+            Secure link for sharing with others. All traffic is routed through secure channels.
           </p>
-        </TabsContent>
-
-        <TabsContent value="onion">
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              value={onionAddress ? `http://${onionAddress}/chat/${chatId}` : "Loading onion address..."}
-              readOnly
-              className="flex-grow bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500"
-            />
-            <Button
-              onClick={copyOnionLink}
-              variant="secondary"
-              className="bg-gray-700 hover:bg-gray-600"
-              disabled={!onionAddress}
-            >
-              {copiedOnion ? <Check className="mr-2" /> : <Copy className="mr-2" />}
-              {copiedOnion ? "Copied!" : "Copy"}
-            </Button>
-          </div>
-          <div className="mt-2 text-sm text-yellow-400 flex items-center">
-            <Shield className="w-4 h-4 mr-1" />
-            <span>For maximum privacy, use this link with Tor Browser.</span>
-          </div>
         </TabsContent>
 
         <TabsContent value="email">

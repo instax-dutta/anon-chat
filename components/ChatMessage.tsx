@@ -83,12 +83,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isOwnMessage }) => {
             : "bg-gray-800/50 border-gray-700/50"
         } border rounded-lg p-3`}
       >
-        {!isOwnMessage && (
-          <div className="flex items-center mb-1">
-            <Shield className="w-4 h-4 text-yellow-400 mr-1" />
-            <span className="text-sm font-medium text-yellow-400">{message.sender_name}</span>
-          </div>
-        )}
+        <div className="flex items-center mb-1">
+          <Shield className="w-4 h-4 text-yellow-400 mr-1" />
+          <span className="text-sm font-medium text-yellow-400">
+            {isOwnMessage ? "You" : message.sender_name}
+          </span>
+        </div>
 
         {message.message_type === "File" && message.file_info ? (
           <div className="mb-2">

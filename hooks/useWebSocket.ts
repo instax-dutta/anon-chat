@@ -152,13 +152,26 @@ export function useWebSocket(chatId: string, username: string) {
             content,
           })
         )
+        
+        // Add the message to local state immediately
+        const newMessage: ChatMessage = {
+          id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          chat_id: chatId,
+          sender_id: username,
+          sender_name: username,
+          content: content,
+          message_type: "Text",
+          timestamp: new Date().toISOString()
+        }
+        
+        setMessages(prevMessages => [...prevMessages, newMessage])
         return true
       } catch (err) {
         console.error("Error sending message:", err)
         return false
       }
     },
-    []
+    [chatId, username]
   )
 
   // Send a file
@@ -188,6 +201,20 @@ export function useWebSocket(chatId: string, username: string) {
                 file_info: fileInfo,
               })
             )
+            
+            // Add the file message to local state immediately
+            const newMessage: ChatMessage = {
+              id: `local-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              chat_id: chatId,
+              sender_id: username,
+              sender_name: username,
+              content: `Shared a file: ${file.name}`,
+              message_type: "File",
+              timestamp: new Date().toISOString(),
+              file_info: fileInfo
+            }
+            
+            setMessages(prevMessages => [...prevMessages, newMessage])
             resolve(true)
           } catch (err) {
             console.error("Error sending file:", err)
@@ -201,7 +228,7 @@ export function useWebSocket(chatId: string, username: string) {
         reader.readAsDataURL(file)
       })
     },
-    []
+    [chatId, username]
   )
 
   // Connect on component mount
