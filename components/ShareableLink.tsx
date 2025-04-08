@@ -73,27 +73,35 @@ export default function ShareableLink({ chatId, maxParticipants }: ShareableLink
       return
     }
 
-    const subject = "Invitation to AnonChat"
+    const subject = "🔒 Join me in a secure chat on AnonChat"
     const body = `
-Hello,
+Hi there,
 
-You've been invited to join a secure, anonymous chat.
+🌟 You've been invited to join a private, secure conversation on AnonChat! 🌟
 
-Click the link below to join:
+💬 AnonChat provides end-to-end encrypted messaging where your privacy is our top priority.
+
+🔐 No registration required, no personal data stored, and messages disappear after 24 hours.
+
+📱 Simply click the magic link below to join instantly:
 ${webLink}
 
-This link will only work once and expires after 24 hours.
+⏳ This invitation expires in 24 hours and can only be used once.
 
-Regards,
-AnonChat
+${maxParticipants && maxParticipants > 2 ? `👥 This is a group chat with up to ${maxParticipants} participants.` : "👤 This is a private one-on-one conversation."}
+
+Looking forward to chatting with you!
+
+✨ Sent via AnonChat - Secure, Private, Ephemeral
     `.trim()
 
     const mailtoLink = `mailto:${emails.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     window.open(mailtoLink, '_blank')
 
     toast({
-      title: "Email client opened",
-      description: `Invitation prepared for ${emails.length} recipient${emails.length > 1 ? 's' : ''}`,
+      title: "✨ Invitation Ready!",
+      description: `Your secure chat invite is prepared for ${emails.length} recipient${emails.length > 1 ? 's' : ''}. Check your email client to send it.`,
+      variant: "default"
     })
   }
 
@@ -190,15 +198,15 @@ AnonChat
 
             <Button 
               onClick={sendInvites} 
-              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600"
+              className="w-full mt-4 bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105"
               disabled={emails.length === 0}
             >
               <Send className="mr-2 w-4 h-4" />
-              Send Invites
+              {emails.length > 1 ? `Send ${emails.length} Magic Invites ✨` : 'Send Magic Invite ✨'}
             </Button>
 
-            <p className="text-sm text-gray-400">
-              This will open your email client with a pre-populated message containing the invite link.
+            <p className="text-sm text-gray-400 italic">
+              ✨ This will open your email client with a beautifully crafted invitation message. Your recipients will receive a secure, one-time link to join your chat.
             </p>
           </div>
         </TabsContent>
