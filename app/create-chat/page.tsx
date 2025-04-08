@@ -36,7 +36,7 @@ export default function CreateChatPage() {
     setError(null)
 
     try {
-      const apiUrl = API_CONFIG.getApiUrl("/chats");
+      const apiUrl = API_CONFIG.getApiUrl("/chat");
 
       const response = await fetch(apiUrl, {
         method: "POST",
