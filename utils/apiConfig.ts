@@ -1,9 +1,9 @@
 "use client"
 
-// Base domain for the API
+// Base domain for the API (updated to HTTPS endpoint)
 const BASE_DOMAIN = 'https://api.anonchat.space';
 // WebSocket base domain
-const WS_BASE_DOMAIN = BASE_DOMAIN.replace(/^http/, 'ws'); // Will become wss://api.anonchat.space
+const WS_BASE_DOMAIN = BASE_DOMAIN.replace(/^http/, 'ws'); // wss://api.anonchat.space
 
 // API configuration
 const API_CONFIG = {
@@ -12,18 +12,15 @@ const API_CONFIG = {
 
   // Get the full API URL for a specific endpoint
   getApiUrl: (endpoint: string) => {
-    // Base URL already includes /api
     const cleanBase = API_CONFIG.baseUrl.endsWith('/') ? API_CONFIG.baseUrl.slice(0, -1) : API_CONFIG.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    return `${cleanBase}${cleanEndpoint}`; // Constructs https://api.anonchat.space/api/...
+    return `${cleanBase}${cleanEndpoint}`;
   },
 
   // Get the WebSocket URL for a specific chat ID
   getWebSocketUrl: (chatId: string) => {
-    // Ensure no double slashes in the base WS domain
     const cleanWsBase = WS_BASE_DOMAIN.endsWith('/') ? WS_BASE_DOMAIN.slice(0, -1) : WS_BASE_DOMAIN;
-    // Append the /api/ws/:chat_id path
-    return `${cleanWsBase}/api/ws/${chatId}`; // Constructs wss://api.anonchat.space/api/ws/:chat_id
+    return `${cleanWsBase}/api/ws/${chatId}`;
   }
 };
 
