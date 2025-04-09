@@ -45,7 +45,7 @@ export default function CreateChatPage() {
         },
         body: JSON.stringify({
           title: chatTitle.trim() || undefined,
-          max_participants: parseInt(maxParticipants),
+          max_participants: parseInt(maxParticipants, 10),
         }),
       })
 
