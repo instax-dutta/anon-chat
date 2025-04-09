@@ -74,12 +74,18 @@ export function useWebSocket(chatId: string, username: string) {
 
           // Handle different types of messages
           if (data.type === "chat_info") {
-            // Chat room information
-            setMaxParticipants(data.max_participants || 2)
-            setParticipants(data.participants || [])
+            console.log('Received chat_info:', {
+              creator_id: data.creator_id, 
+              senderId: senderId,
+              isCreator: data.creator_id === senderId
+            });
+            setMaxParticipants(data.max_participants || 2);
+            setParticipants(data.participants || []);
             if (data.creator_id) {
-              setCreatorId(data.creator_id)
-              setIsCreator(data.creator_id === senderId)
+              setCreatorId(data.creator_id);
+              const isCreator = data.creator_id === senderId;
+              console.log(`Setting isCreator: ${isCreator}`);
+              setIsCreator(isCreator);
             }
           } else if (data.type === "participant_joined") {
             // New participant joined
