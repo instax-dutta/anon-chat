@@ -38,6 +38,8 @@ export function useWebSocket(chatId: string, username: string) {
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [creatorId, setCreatorId] = useState<string | null>(null)
+  const [senderId] = useState<string>(() => `${username}-${Math.random().toString(36).substring(2, 9)}`)
   const socketRef = useRef<WebSocket | null>(null)
 
   // Get the WebSocket URL from API config
