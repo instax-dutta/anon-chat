@@ -38,12 +38,14 @@ export default function CreateChatPage() {
     try {
       const apiUrl = API_CONFIG.getApiUrl("/chat");
 
-      const formData = new FormData();
-      formData.append('max_participants', maxParticipants);
-
       const response = await fetch(apiUrl, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          max_participants: parseInt(maxParticipants, 10)
+        }),
         credentials: 'include'
       })
 
