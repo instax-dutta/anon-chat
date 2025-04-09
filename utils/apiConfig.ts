@@ -1,29 +1,29 @@
 "use client"
 
-// Use the production API endpoint
-const BASE_URL = 'https://api.anonchat.space/api';
-// Derive WebSocket base URL by replacing the protocol of the API base URL
-const WS_BASE_URL = BASE_URL.replace(/^http/, 'ws'); // Will become wss://api.anonchat.space/api
+// Base domain for the API
+const BASE_DOMAIN = 'https://api.anonchat.space';
+// WebSocket base domain
+const WS_BASE_DOMAIN = BASE_DOMAIN.replace(/^http/, 'ws'); // Will become wss://api.anonchat.space
 
 // API configuration
 const API_CONFIG = {
-  // Base URL for API requests
-  baseUrl: BASE_URL,
+  // Base URL for API requests (includes /api path)
+  baseUrl: `${BASE_DOMAIN}/api`,
 
   // Get the full API URL for a specific endpoint
   getApiUrl: (endpoint: string) => {
-    // Ensure no double slashes
-    const cleanBase = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+    // Base URL already includes /api
+    const cleanBase = API_CONFIG.baseUrl.endsWith('/') ? API_CONFIG.baseUrl.slice(0, -1) : API_CONFIG.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     return `${cleanBase}${cleanEndpoint}`; // Constructs https://api.anonchat.space/api/...
   },
 
   // Get the WebSocket URL for a specific chat ID
   getWebSocketUrl: (chatId: string) => {
-    // Ensure no double slashes in the base WS URL
-    const cleanWsBase = WS_BASE_URL.endsWith('/') ? WS_BASE_URL.slice(0, -1) : WS_BASE_URL;
-    // Append the correct path as defined in the backend
-    return `${cleanWsBase}/ws/${chatId}`; // Constructs wss://api.anonchat.space/api/ws/:chat_id (Correct)
+    // Ensure no double slashes in the base WS domain
+    const cleanWsBase = WS_BASE_DOMAIN.endsWith('/') ? WS_BASE_DOMAIN.slice(0, -1) : WS_BASE_DOMAIN;
+    // Append the /api/ws/:chat_id path
+    return `${cleanWsBase}/api/ws/${chatId}`; // Constructs wss://api.anonchat.space/api/ws/:chat_id
   }
 };
 
