@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import API_CONFIG from "@/utils/apiConfig"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,7 +51,8 @@ export default function ChatRoom() {
     isLoading,
     error,
     participants,
-    maxParticipants
+    maxParticipants,
+    isCreator
   } = useWebSocket(id, username)
 
   // Scroll to bottom when messages change
@@ -92,9 +94,29 @@ export default function ChatRoom() {
     }
   }
 
-  const endChat = () => {
+  const endChat = async () => {
     if (window.confirm("Are you sure you want to end this chat? This action cannot be undone.")) {
-      window.location.href = "/"
+      try {
+        const response = await fetch(API_CONFIG.getApiUrl("/endchat"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: id,
+            sender_id: username
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to end chat")
+        }
+
+        window.location.href = "/"
+      } catch (err) {
+        console.error("Error ending chat:", err)
+        alert("Failed to end chat. Please try again.")
+      }
     }
   }
 
@@ -128,10 +150,12 @@ export default function ChatRoom() {
             <Settings className="mr-2" />
             Settings
           </Button>
-          <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
-            End Chat
-            <X className="ml-2" />
-          </Button>
+          {isCreator && (
+            <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
+              End Chat
+              <X className="ml-2" />
+            </Button>
+          )}
         </div>
       </header>
 
@@ -210,4 +234,3 @@ export default function ChatRoom() {
     </div>
   )
 }
-

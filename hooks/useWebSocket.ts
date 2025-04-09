@@ -40,6 +40,7 @@ export function useWebSocket(chatId: string, username: string) {
   const [error, setError] = useState<string | null>(null)
   const [creatorId, setCreatorId] = useState<string | null>(null)
   const [senderId] = useState<string>(() => `${username}-${Math.random().toString(36).substring(2, 9)}`)
+  const [isCreator, setIsCreator] = useState(false)
   const socketRef = useRef<WebSocket | null>(null)
 
   // Get the WebSocket URL from API config
@@ -76,6 +77,10 @@ export function useWebSocket(chatId: string, username: string) {
             // Chat room information
             setMaxParticipants(data.max_participants || 2)
             setParticipants(data.participants || [])
+            if (data.creator_id) {
+              setCreatorId(data.creator_id)
+              setIsCreator(data.creator_id === senderId)
+            }
           } else if (data.type === "participant_joined") {
             // New participant joined
             setParticipants(prev => [...prev, {
@@ -255,5 +260,6 @@ export function useWebSocket(chatId: string, username: string) {
     error,
     participants,
     maxParticipants,
-  }
+    isCreator,
+  } as const;
 }
