@@ -38,9 +38,7 @@ export function useWebSocket(chatId: string, username: string) {
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [creatorId, setCreatorId] = useState<string | null>(null)
   const [senderId] = useState<string>(() => `${username}-${Math.random().toString(36).substring(2, 9)}`)
-  const [isCreator, setIsCreator] = useState(false)
   const socketRef = useRef<WebSocket | null>(null)
 
   // Get the WebSocket URL from API config
@@ -74,19 +72,8 @@ export function useWebSocket(chatId: string, username: string) {
 
           // Handle different types of messages
           if (data.type === "chat_info") {
-            console.log('Received chat_info:', {
-              creator_id: data.creator_id, 
-              senderId: senderId,
-              isCreator: data.creator_id === senderId
-            });
             setMaxParticipants(data.max_participants || 2);
             setParticipants(data.participants || []);
-            if (data.creator_id) {
-              setCreatorId(data.creator_id);
-              const isCreator = data.creator_id === senderId;
-              console.log(`Setting isCreator: ${isCreator}`);
-              setIsCreator(isCreator);
-            }
           } else if (data.type === "participant_joined") {
             // New participant joined
             setParticipants(prev => [...prev, {
@@ -266,6 +253,5 @@ export function useWebSocket(chatId: string, username: string) {
     error,
     participants,
     maxParticipants,
-    isCreator,
   } as const;
 }

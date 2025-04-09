@@ -51,8 +51,7 @@ export default function ChatRoom() {
     isLoading,
     error,
     participants,
-    maxParticipants,
-    isCreator
+    maxParticipants
   } = useWebSocket(id, username)
 
   // Scroll to bottom when messages change
@@ -150,12 +149,10 @@ export default function ChatRoom() {
             <Settings className="mr-2" />
             Settings
           </Button>
-          {isCreator && (
-            <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
-              End Chat
-              <X className="ml-2" />
-            </Button>
-          )}
+          <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
+            Leave Chat
+            <X className="ml-2" />
+          </Button>
         </div>
       </header>
 
