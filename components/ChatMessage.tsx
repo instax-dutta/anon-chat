@@ -23,7 +23,13 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isOwnMessage }) => {
-  const timestamp = new Date(message.timestamp)
+  let timestamp: Date
+  try {
+    timestamp = new Date(message.timestamp)
+    if (isNaN(timestamp.getTime())) throw new Error("Invalid date")
+  } catch {
+    timestamp = new Date() // fallback to now
+  }
   const timeAgo = formatDistanceToNow(timestamp, { addSuffix: true })
 
   const handleDownload = () => {
