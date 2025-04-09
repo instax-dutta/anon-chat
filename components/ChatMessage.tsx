@@ -1,6 +1,6 @@
 import React from "react"
 import { motion } from "framer-motion"
-import { Shield, Download, File, User, Info } from "lucide-react"
+import { Shield, User, Info } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface ChatMessageProps {
@@ -10,14 +10,8 @@ interface ChatMessageProps {
     sender_id: string
     sender_name: string
     content: string
-    message_type: "Text" | "File" | "Join" | "Leave" | "System"
+    message_type: "Text" | "Join" | "Leave" | "System"
     timestamp: string
-    file_info?: {
-      name: string
-      size: number
-      mime_type: string
-      content: string
-    }
   }
   isOwnMessage: boolean
 }
@@ -31,17 +25,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isOwnMessage }) => {
     timestamp = new Date() // fallback to now
   }
   const timeAgo = formatDistanceToNow(timestamp, { addSuffix: true })
-
-  const handleDownload = () => {
-    if (!message.file_info) return
-
-    const link = document.createElement("a")
-    link.href = `data:${message.file_info.mime_type};base64,${message.file_info.content}`
-    link.download = message.file_info.name
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
 
   // System messages
   if (message.message_type === "System") {
@@ -95,27 +78,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isOwnMessage }) => {
             {isOwnMessage ? "You" : message.sender_name}
           </span>
         </div>
-
-        {message.message_type === "File" && message.file_info ? (
-          <div className="mb-2">
-            <div className="flex items-center bg-gray-900/50 p-2 rounded-md">
-              <File className="text-purple-400 mr-2" />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-white truncate">{message.file_info.name}</div>
-                <div className="text-xs text-gray-400">
-                  {(message.file_info.size / 1024).toFixed(1)} KB
-                </div>
-              </div>
-              <button
-                onClick={handleDownload}
-                className="ml-2 p-1 bg-gray-700 hover:bg-gray-600 rounded-full"
-                title="Download file"
-              >
-                <Download className="w-4 h-4 text-purple-300" />
-              </button>
-            </div>
-          </div>
-        ) : null}
 
         <p className="text-white break-words">{message.content}</p>
         <div className="text-right mt-1">

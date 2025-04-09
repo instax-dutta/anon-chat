@@ -44,7 +44,6 @@ export default function ChatRoom() {
   const {
     messages,
     sendMessage,
-    sendFile,
     isConnected,
     isLoading,
     error,
@@ -59,13 +58,26 @@ export default function ChatRoom() {
     }
   }, [messages])
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const [isSending, setIsSending] = useState(false)
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputMessage.trim()) {
-      const success = sendMessage(inputMessage.trim())
+    const message = inputMessage.trim()
+    
+    if (!message || message.length > 1000) {
+      return
+    }
+
+    setIsSending(true)
+    try {
+      const success = await sendMessage(message)
       if (success) {
         setInputMessage("")
       }
+    } catch (err) {
+      console.error("Failed to send message:", err)
+    } finally {
+      setIsSending(false)
     }
   }
 
