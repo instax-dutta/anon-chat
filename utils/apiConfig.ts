@@ -14,7 +14,8 @@ const getBaseUrl = () => {
   }
   
   // For regular web access in production
-  return process.env.NEXT_PUBLIC_PRODUCTION_API_URL || 'https://api.anonchat.space/api';
+  // Use the provided IP address as the fallback
+  return process.env.NEXT_PUBLIC_PRODUCTION_API_URL || 'http://161.97.172.209:3000/api';
 };
 
 // API configuration with dynamic URL determination
@@ -27,7 +28,10 @@ const API_CONFIG = {
   // Get the full API URL for a specific endpoint
   getApiUrl: (endpoint: string) => {
     const base = getBaseUrl();
-    return `${base}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    // Ensure no double slashes
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    return `${cleanBase}${cleanEndpoint}`;
   },
 
   // Get the WebSocket URL for a specific chat ID
@@ -35,7 +39,9 @@ const API_CONFIG = {
     const base = getBaseUrl();
     // Replace http:// with ws:// or https:// with wss://
     const wsBase = base.replace(/^http/, 'ws');
-    return `${wsBase}/ws/${chatId}`;
+    // Ensure no double slashes
+    const cleanWsBase = wsBase.endsWith('/') ? wsBase.slice(0, -1) : wsBase;
+    return `${cleanWsBase}/ws/${chatId}`;
   }
 };
 
