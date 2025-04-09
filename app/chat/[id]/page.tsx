@@ -93,29 +93,10 @@ export default function ChatRoom() {
     }
   }
 
-  const endChat = async () => {
-    if (window.confirm("Are you sure you want to end this chat? This action cannot be undone.")) {
-      try {
-        const response = await fetch(API_CONFIG.getApiUrl("/endchat"), {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: id,
-            sender_id: username
-          })
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to end chat")
-        }
-
-        window.location.href = "/"
-      } catch (err) {
-        console.error("Error ending chat:", err)
-        alert("Failed to end chat. Please try again.")
-      }
+  const leaveChat = () => {
+    if (window.confirm("Are you sure you want to leave this chat?")) {
+      // Simply navigate to the homepage. The WebSocket connection will close automatically.
+      window.location.href = "/"
     }
   }
 
@@ -149,7 +130,7 @@ export default function ChatRoom() {
             <Settings className="mr-2" />
             Settings
           </Button>
-          <Button onClick={endChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
+          <Button onClick={leaveChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
             Leave Chat
             <X className="ml-2" />
           </Button>
