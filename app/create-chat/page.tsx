@@ -36,7 +36,7 @@ export default function CreateChatPage() {
     setError(null)
 
     try {
-      const apiUrl = API_CONFIG.getApiUrl("/chat");
+      const apiUrl = API_CONFIG.getApiUrl("/");
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -44,7 +44,6 @@ export default function CreateChatPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: chatTitle.trim() || undefined,
           max_participants: parseInt(maxParticipants, 10),
         }),
       })
