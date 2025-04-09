@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import API_CONFIG from "@/utils/apiConfig"
 
 interface ChatMessage {
   id: string
@@ -39,10 +40,9 @@ export function useWebSocket(chatId: string, username: string) {
   const [error, setError] = useState<string | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
 
-  // Get the WebSocket URL with hardcoded domain
+  // Get the WebSocket URL from API config
   const getWebSocketUrl = useCallback(() => {
-    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//api.anonchat.space/api/ws/${chatId}`;
+    return API_CONFIG.getWebSocketUrl(chatId);
   }, [chatId])
 
   // Connect to the WebSocket

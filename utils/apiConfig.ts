@@ -1,9 +1,10 @@
 "use client"
 
+// Use the working API endpoint
 const BASE_URL = 'http://161.97.172.209:3000/api';
 const WS_BASE_URL = BASE_URL.replace(/^http/, 'ws');
 
-// API configuration using a fixed URL
+// API configuration
 const API_CONFIG = {
   // Base URL for API requests
   baseUrl: BASE_URL,
