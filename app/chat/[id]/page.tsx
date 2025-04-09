@@ -142,7 +142,7 @@ export default function ChatRoom() {
           <div className="flex items-center bg-gray-700/50 px-3 py-1 rounded-full">
             <Users className="mr-2 text-purple-300 h-4 w-4" />
             <span className="text-sm text-gray-300">
-              {participants?.length || 1}/{maxParticipants || 2}
+              {participants?.length ?? '?'}/{maxParticipants ?? '?'}
             </span>
           </div>
           <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
