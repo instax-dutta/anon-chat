@@ -2,7 +2,8 @@
 
 // Use the production API endpoint
 const BASE_URL = 'https://api.anonchat.space/api';
-const WS_BASE_URL = BASE_URL.replace(/^http/, 'ws'); // Will become wss://
+// Derive WebSocket base URL from the origin, replacing http(s) with ws(s)
+const WS_BASE_URL = new URL(BASE_URL).origin.replace(/^http/, 'ws'); // Will become wss://api.anonchat.space
 
 // API configuration
 const API_CONFIG = {
