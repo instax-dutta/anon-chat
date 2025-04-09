@@ -20,7 +20,7 @@ const API_CONFIG = {
   // Get the WebSocket URL for a specific chat ID
   getWebSocketUrl: (chatId: string) => {
     const cleanWsBase = WS_BASE_DOMAIN.endsWith('/') ? WS_BASE_DOMAIN.slice(0, -1) : WS_BASE_DOMAIN;
-    return `${cleanWsBase}/ws/${chatId}`;
+    return `${cleanWsBase}/api/ws/${chatId}`;
   }
 };
 
