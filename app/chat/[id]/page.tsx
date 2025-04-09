@@ -5,7 +5,7 @@ import API_CONFIG from "@/utils/apiConfig"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, X, Upload, Shield, File, AlertTriangle, Users, Settings, Loader2 } from "lucide-react"
+import { Send, X, Shield, AlertTriangle, Users, Settings, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useWebSocket } from "@/hooks/useWebSocket"
 import { useScreenshotDetection } from "@/hooks/useScreenshotDetection"
@@ -16,8 +16,6 @@ export default function ChatRoom() {
   const { id } = useParams() as { id: string }
   const [inputMessage, setInputMessage] = useState("")
   const [username, setUsername] = useState("")
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isScreenshotTaken = useScreenshotDetection()
@@ -73,24 +71,6 @@ export default function ChatRoom() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(e.target.value)
-  }
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setIsUploading(true)
-      try {
-        await sendFile(file)
-      } catch (error) {
-        console.error("Error uploading file:", error)
-      } finally {
-        setIsUploading(false)
-        // Clear the input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""
-        }
-      }
-    }
   }
 
   const leaveChat = () => {
@@ -186,26 +166,6 @@ export default function ChatRoom() {
           >
             <Send className="mr-2" />
             Send
-          </Button>
-          <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-          <Button
-            type="button"
-            variant="secondary"
-            className="hidden xs:inline-flex bg-gray-700 hover:bg-gray-600"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={!isConnected || isUploading}
-          >
-            {isUploading ? (
-              <>
-                <Loader2 className="animate-spin mr-2" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2" />
-                Upload
-              </>
-            )}
           </Button>
         </form>
       </footer>
