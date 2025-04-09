@@ -53,8 +53,14 @@ export default function CreateChatPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
+        console.log('Full error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          errorData
+        })
         throw new Error(
-          errorData?.error || `Failed to create chat: ${response.statusText}`
+          errorData?.message || errorData?.error || `Failed to create chat: ${response.statusText}`
         )
       }
 
