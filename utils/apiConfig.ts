@@ -1,8 +1,8 @@
 "use client"
 
-// Use the working API endpoint
-const BASE_URL = 'http://161.97.172.209:3000/api';
-const WS_BASE_URL = BASE_URL.replace(/^http/, 'ws');
+// Use the production API endpoint
+const BASE_URL = 'https://api.anonchat.space/api';
+const WS_BASE_URL = BASE_URL.replace(/^http/, 'ws'); // Will become wss://
 
 // API configuration
 const API_CONFIG = {
