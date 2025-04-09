@@ -42,11 +42,13 @@ export default function CreateChatPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json"
         },
         body: JSON.stringify({
-          max_participants: parseInt(maxParticipants, 10)
+          max_participants: Number(maxParticipants)
         }),
-        credentials: 'include'
+        credentials: 'include',
+        mode: 'cors'
       })
 
       if (!response.ok) {
