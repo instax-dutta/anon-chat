@@ -73,29 +73,47 @@ export default function ShareableLink({ chatId, maxParticipants }: ShareableLink
       return
     }
 
-    const subject = "🔒 Join me in a secure chat on AnonChat"
-    const body = `
-Hi there,
+    // --- Improved Mailto Template ---
+    const encodedSubject = encodeURIComponent(`🤫 You're Invited to a Private AnonChat Room!`);
 
-🌟 You've been invited to join a private, secure conversation on AnonChat! 🌟
+    const bodyLines = [
+      `Hello,`,
+      ``,
+      `You've received an invitation to join a secure and private chat room on AnonChat. 🛡️`,
+      ``,
+      `----------------------------------------`,
+      `   ✨ JOIN THE CHAT HERE ✨`,
+      `   ${webLink}`, // Keep the raw link visible for clarity in the email body
+      `----------------------------------------`,
+      ``,
+      `What makes AnonChat special?`,
+      `  • End-to-end encrypted messaging ensures privacy.`,
+      `  • No registration or personal info required.`,
+      `  • Messages are ephemeral and disappear after 24 hours.`,
+      ``,
+      `Chat Room Details:`,
+      `  • Room ID: ${chatId}`,
+      `  • Max Participants: ${maxParticipants || 'Default (2)'}`,
+      `  • Type: ${maxParticipants && maxParticipants > 2 ? 'Group Chat 👥' : 'Private Chat 👤'}`,
+      ``,
+      `Important Notes:`,
+      `  • This invitation link is unique to you and works only once.`,
+      `  • The link will expire in 24 hours. ⏳`,
+      ``,
+      `Click the link above to join the conversation securely.`,
+      ``,
+      `See you there!`,
+      ``,
+      `-- AnonChat --`,
+      `Secure | Private | Ephemeral`
+    ];
 
-💬 AnonChat provides end-to-end encrypted messaging where your privacy is our top priority.
+    // Encode each line individually and join with URL-encoded newline (%0A)
+    const encodedBody = bodyLines.map(line => encodeURIComponent(line)).join('%0A');
 
-🔐 No registration required, no personal data stored, and messages disappear after 24 hours.
+    const mailtoLink = `mailto:${emails.join(',')}?subject=${encodedSubject}&body=${encodedBody}`;
+    // --- End of Improved Template ---
 
-📱 Simply click the magic link below to join instantly:
-${webLink}
-
-⏳ This invitation expires in 24 hours and can only be used once.
-
-${maxParticipants && maxParticipants > 2 ? `👥 This is a group chat with up to ${maxParticipants} participants.` : "👤 This is a private one-on-one conversation."}
-
-Looking forward to chatting with you!
-
-✨ Sent via AnonChat - Secure, Private, Ephemeral
-    `.trim()
-
-    const mailtoLink = `mailto:${emails.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     window.open(mailtoLink, '_blank')
 
     toast({
@@ -230,4 +248,3 @@ Looking forward to chatting with you!
     </motion.div>
   )
 }
-
