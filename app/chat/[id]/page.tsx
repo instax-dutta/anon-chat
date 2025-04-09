@@ -109,30 +109,30 @@ export default function ChatRoom() {
         </div>
       )}
 
-      <header className="bg-gray-800 p-4 flex justify-between items-center">
-        <motion.div initial={{ x: -20 }} animate={{ x: 0 }} className="flex items-center">
-          <Shield className="mr-2 text-yellow-400" />
-          <h1 className="text-xl font-bold text-purple-300">AnonChat: Room {id}</h1>
+      <header className="bg-gray-800 p-3 sm:p-4 flex justify-between items-center gap-2">
+        <motion.div initial={{ x: -20 }} animate={{ x: 0 }} className="flex items-center min-w-0">
+          <Shield className="mr-2 text-yellow-400 flex-shrink-0" />
+          <h1 className="text-lg sm:text-xl font-bold text-purple-300 truncate">AnonChat: Room {id}</h1>
           {isConnected && (
-            <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">
+            <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full flex-shrink-0">
               Connected
             </span>
           )}
         </motion.div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center bg-gray-700/50 px-3 py-1 rounded-full">
-            <Users className="mr-2 text-purple-300 h-4 w-4" />
-            <span className="text-sm text-gray-300">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="hidden xs:flex items-center bg-gray-700/50 px-2 sm:px-3 py-1 rounded-full">
+            <Users className="mr-1 sm:mr-2 text-purple-300 h-3 sm:h-4 w-3 sm:w-4" />
+            <span className="text-xs sm:text-sm text-gray-300 truncate">
               {participants?.length ?? '?'}/{maxParticipants ?? '?'}
             </span>
           </div>
-          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex text-gray-300 hover:text-white">
             <Settings className="mr-2" />
             Settings
           </Button>
           <Button onClick={leaveChat} variant="destructive" size="sm" className="bg-red-600 hover:bg-red-700">
-            Leave Chat
-            <X className="ml-2" />
+            <span className="hidden sm:inline">Leave Chat</span>
+            <X className="sm:ml-2" />
           </Button>
         </div>
       </header>
@@ -169,8 +169,8 @@ export default function ChatRoom() {
         )}
       </main>
 
-      <footer className="bg-gray-800 p-4">
-        <form onSubmit={handleSendMessage} className="flex space-x-2">
+      <footer className="bg-gray-800 p-2 sm:p-4">
+        <form onSubmit={handleSendMessage} className="flex gap-1 sm:gap-2">
           <Input
             type="text"
             placeholder="Type your message..."
@@ -191,7 +191,7 @@ export default function ChatRoom() {
           <Button
             type="button"
             variant="secondary"
-            className="bg-gray-700 hover:bg-gray-600"
+            className="hidden xs:inline-flex bg-gray-700 hover:bg-gray-600"
             onClick={() => fileInputRef.current?.click()}
             disabled={!isConnected || isUploading}
           >

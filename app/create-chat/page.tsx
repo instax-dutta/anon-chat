@@ -140,10 +140,10 @@ export default function CreateChatPage() {
                 onValueChange={setMaxParticipants}
                 disabled={isLoading}
               >
-                <SelectTrigger className="bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500">
-                  <SelectValue placeholder="Select maximum participants" />
+                <SelectTrigger className="w-full bg-gray-800 text-white border-gray-700 focus:border-purple-500 focus:ring-purple-500">
+                  <SelectValue placeholder="Select participants" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 text-white border-gray-700">
+                <SelectContent className="bg-gray-800 text-white border-gray-700 w-[var(--radix-select-trigger-width)]">
                   <SelectItem value="2">2 people (private chat)</SelectItem>
                   <SelectItem value="5">5 people (small group)</SelectItem>
                   <SelectItem value="10">10 people (medium group)</SelectItem>
