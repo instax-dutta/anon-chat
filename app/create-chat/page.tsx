@@ -44,9 +44,7 @@ export default function CreateChatPage() {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({
-          max_participants: Number(maxParticipants)
-        }),
+        body: JSON.stringify(Number(maxParticipants)),
         credentials: 'include',
         mode: 'cors'
       })
