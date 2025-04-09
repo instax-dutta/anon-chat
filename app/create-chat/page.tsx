@@ -44,8 +44,9 @@ export default function CreateChatPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          max_participants: parseInt(maxParticipants, 10),
+          max_participants: parseInt(maxParticipants, 10)
         }),
+        credentials: 'include'
       })
 
       if (!response.ok) {
